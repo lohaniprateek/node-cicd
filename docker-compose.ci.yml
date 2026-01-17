@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  dind:
+    image: docker:24-dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command: --host=tcp://0.0.0.0:2375
+    ports:
+      - "2375:2375"
+    volumes:
+      - dind-data:/var/lib/docker
+
+  jenkins:
+    build: ./jenkins
+    ports:
+      - "8080:8080"
+    environment:
+      DOCKER_HOST: tcp://dind:2375
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - .:/workspace
+    depends_on:
+      - dind
+
+volumes:
+  jenkins-home:
+  dind-data:
